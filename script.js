@@ -1,6 +1,7 @@
 function updateName() {
     var url = new URL(window.location.href);
-    var name = url.searchParams.get("name") || '';
+    var encodedName = url.searchParams.get("name") || '';
+    var name = atob(encodedName); // Decode the name from Base64
     var displayName = name.charAt(0).toUpperCase() + name.slice(1);
     document.getElementById('namePlaceholder').textContent = displayName ? `, ${displayName}` : '';
 }
@@ -16,5 +17,13 @@ function moveButton() {
     noButton.style.left = `${x}px`;
     noButton.style.top = `${y}px`;
 }
+
+function forwardWithName() {
+    var loverName = document.getElementById('loverName').value;
+    var encodedName = btoa(loverName); // Encode the name using Base64
+    window.location.href = "index.html?name=" + encodeURIComponent(encodedName);
+}
+
+
 
 window.onload = updateName;

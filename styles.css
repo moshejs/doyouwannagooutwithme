@@ -98,3 +98,14 @@ body {
         font-size: 14px;
     }
 }
+
+input[type="text"] {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form {
+    text-align: center;
+}
