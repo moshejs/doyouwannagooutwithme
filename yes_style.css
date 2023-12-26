@@ -3,21 +3,44 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #1E2A36; /* Changed to a dark navy blue */
+    background-color: #89CFF0; /* Baby blue background for a friendly, inviting feel */
 }
 
 .header_text {
-    font-family: 'Nunito';
-    font-size: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 3em; /* Increased to 50px for better visibility */
     font-weight: bold;
-    color: #D1E8E2; /* Changed to a light grey-blue for contrast */
+    color: #03396C; /* A darker shade for strong contrast against the baby blue background */
     text-align: center;
     margin-top: 20px;
     margin-bottom: 0px;
+    line-height: 1.2; /* Improve readability */
 }
 
 .gif_container {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: 20px; /* Added margin for spacing */
+}
+
+/* Responsiveness for smaller devices */
+@media only screen and (max-width: 768px) {
+    .header_text {
+        font-size: 2em; /* Smaller font for smaller screens */
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    body {
+        padding: 10px; /* Add padding to avoid text touching the edges */
+    }
+
+    .header_text {
+        font-size: 1.5em;
+    }
+
+    .gif_container {
+        margin-top: 15px;
+    }
 }

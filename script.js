@@ -1,29 +1,25 @@
-function updateName() {
-    var url = new URL(window.location.href);
-    var encodedName = url.searchParams.get("name") || '';
-    var name = atob(encodedName); // Decode the name from Base64
-    var displayName = name.charAt(0).toUpperCase() + name.slice(1);
+const updateName = () => {
+    const url = new URL(window.location.href);
+    const encodedName = url.searchParams.get("name") || '';
+    const name = decodeURIComponent(atob(encodedName)); // Decode the name from Base64 and URI component
+    const displayName = name.charAt(0).toUpperCase() + name.slice(1);
     document.getElementById('namePlaceholder').textContent = displayName ? `, ${displayName}` : '';
-}
+};
 
-function nextPage() {
-    window.location.href = "yes.html";
-}
+const nextPage = () => window.location.href = "yes.html";
 
-function moveButton() {
-    var noButton = document.getElementById('noButton');
-    var x = Math.random() * (window.innerWidth - noButton.offsetWidth) - 85;
-    var y = Math.random() * (window.innerHeight - noButton.offsetHeight) - 48;
+const moveButton = () => {
+    const noButton = document.getElementById('noButton');
+    const x = Math.random() * (window.innerWidth - noButton.offsetWidth);
+    const y = Math.random() * (window.innerHeight - noButton.offsetHeight);
     noButton.style.left = `${x}px`;
     noButton.style.top = `${y}px`;
-}
+};
 
-function forwardWithName() {
-    var loverName = document.getElementById('loverName').value;
-    var encodedName = btoa(loverName); // Encode the name using Base64
-    window.location.href = "index.html?name=" + encodeURIComponent(encodedName);
-}
+const forwardWithName = () => {
+    const loverName = document.getElementById('loverName').value;
+    const encodedName = btoa(encodeURIComponent(loverName)); // Encode the name using Base64 and URI component
+    window.location.href = `index.html?name=${encodedName}`;
+};
 
-
-
-window.onload = updateName;
+window.addEventListener('load', updateName);
