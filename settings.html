@@ -1,20 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Incoming: Date Invitation</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Make your invite · Do you wanna go out with me?</title>
+    <meta name="description" content="Type their name, get a link, send it.">
+    <meta name="theme-color" content="#89CFF0">
+    <meta name="robots" content="noindex">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥰</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap">
     <link rel="stylesheet" href="./styles.css">
-</head> 
+    <script src="./script.js" defer></script>
+</head>
 <body>
-    <div class="container" role="main">
+    <main class="container">
         <h1 class="header_text">Who's your special someone?</h1>
-        <form id="loverForm" action="javascript:void(0);" onsubmit="forwardWithName()">
-            <input type="text" id="loverName" placeholder="Enter lover's name" aria-label="Lover's Name">
-            <button type="submit" class="btn">Go</button>
+        <p class="subhead">Type their name. We'll give you a link to send them.</p>
+
+        <form id="loverForm" class="builder" novalidate>
+            <label class="visually-hidden" for="loverName">Their name</label>
+            <input type="text" id="loverName" name="loverName"
+                   placeholder="Their name" autocomplete="off"
+                   autocapitalize="words" spellcheck="false" maxlength="40" required>
+            <button type="submit" class="btn btn--yes">Make my link</button>
+            <p class="form-error" id="formError" role="alert"></p>
         </form>
+
+        <section class="result" id="result" hidden aria-live="polite">
+            <p class="result__label">Send them this 👇</p>
+            <a class="result__link" id="linkText" href="#" rel="noopener"></a>
+            <div class="result__actions">
+                <button type="button" class="btn btn--yes" id="copyButton">Copy link</button>
+                <button type="button" class="btn btn--ghost" id="shareButton" hidden>Share…</button>
+                <button type="button" class="btn btn--ghost" id="previewButton">Preview</button>
+            </div>
+        </section>
+
         <div class="gif_container">
-            <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDdtZ2JiZDR0a3lvMWF4OG8yc3p6Ymdvd3g2d245amdveDhyYmx6eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cLS1cfxvGOPVpf9g3y/giphy.gif" alt="Animated character waving">
+            <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDdtZ2JiZDR0a3lvMWF4OG8yc3p6Ymdvd3g2d245amdveDhyYmx6eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cLS1cfxvGOPVpf9g3y/giphy.gif"
+                 alt="An animated character waving hopefully" width="220" height="220">
         </div>
-    </div>
-    <script src="./script.js"></script>
-</body> 
+    </main>
+</body>
 </html>
