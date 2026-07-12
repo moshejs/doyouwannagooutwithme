@@ -236,19 +236,6 @@ input[type='text']:focus {
   font-size: 0.95rem;
 }
 
-.make-your-own {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--blue-deep);
-  text-decoration: none;
-  opacity: 0.6;
-}
-
-.make-your-own:hover {
-  opacity: 1;
-  text-decoration: underline;
-}
-
 /* ---------- yes page ---------- */
 
 .confetti {

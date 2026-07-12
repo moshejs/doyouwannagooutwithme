@@ -338,8 +338,9 @@
         if (!inviteUrl) return;
         try {
           await navigator.share({
-            title: 'Moshe has a question for you',
-            text: 'Do you wanna go out with me? 👀',
+            // Don't reveal the question — the page is the reveal.
+            title: 'Moshe has a question for you 👀',
+            text: 'One question. Two buttons. Open it.',
             url: inviteUrl,
           });
         } catch (_) {
