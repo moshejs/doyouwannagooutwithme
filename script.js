@@ -111,41 +111,97 @@
     let tx = 0;
     let ty = 0;
     let noScale = 1;
+    let lastDodgeAt = 0;
 
-    if (REDUCED_MOTION) noButton.style.transition = 'none';
+    // The button's resting geometry, in PAGE coordinates, with no transform
+    // applied. Cached — never read back mid-flight.
+    //
+    // Reading getBoundingClientRect() during the CSS transition returns the
+    // *interpolated* position, not the settled one. Deriving the clamp bounds
+    // from that made them drift, and the button escaped the screen. On mobile
+    // that happened instantly: one tap fires pointerenter + pointerdown +
+    // touchstart + click, so four dodges landed within a few milliseconds,
+    // each measuring a button that was still moving.
+    const home = { left: 0, top: 0, w: 0, h: 0 };
+
+    const measureHome = () => {
+      const prevTransform = noButton.style.transform;
+      const prevTransition = noButton.style.transition;
+      noButton.style.transition = 'none';
+      noButton.style.transform = 'none';
+      const r = noButton.getBoundingClientRect();
+      home.left = r.left + window.scrollX;
+      home.top = r.top + window.scrollY;
+      home.w = r.width;
+      home.h = r.height;
+      noButton.style.transform = prevTransform;
+      void noButton.offsetWidth; // flush, so restoring the transition doesn't animate the snap-back
+      noButton.style.transition = prevTransition;
+    };
+
+    // The area the user can actually SEE. On mobile, documentElement.clientHeight
+    // includes the strip hidden behind the browser's URL bar; visualViewport
+    // doesn't. Take the smaller of the two so the button can't hide under it.
+    const viewport = () => {
+      const vv = window.visualViewport;
+      return {
+        w: Math.min(document.documentElement.clientWidth, vv ? vv.width : Infinity),
+        h: Math.min(document.documentElement.clientHeight, vv ? vv.height : Infinity),
+      };
+    };
+
+    const clamp = (v, lo, hi) => (lo > hi ? lo : Math.min(Math.max(v, lo), hi));
+
+    // Translation limits that keep the button fully on screen.
+    // transform-origin is top-left (set in CSS), so the visual box is exactly
+    // home + translate, sized home * scale. No origin math, no drift.
+    const limits = () => {
+      const { w: VW, h: VH } = viewport();
+      const pad = 14;
+      const bw = home.w * noScale;
+      const bh = home.h * noScale;
+      const hl = home.left - window.scrollX; // home, in viewport coords
+      const ht = home.top - window.scrollY;
+      return {
+        minX: pad - hl,
+        maxX: VW - pad - bw - hl,
+        minY: pad - ht,
+        maxY: VH - pad - bh - ht,
+        VW,
+      };
+    };
 
     const paint = () => {
       noButton.style.transform = `translate(${tx}px, ${ty}px) scale(${noScale})`;
-      yesButton.style.transform = `scale(${Math.min(1.85, 1 + dodges * 0.07)})`;
+      yesButton.style.transform = `scale(${Math.min(1.6, 1 + dodges * 0.06)})`;
     };
+
+    if (REDUCED_MOTION) noButton.style.transition = 'none';
 
     const dodge = (event) => {
       if (!dodging) return;
       if (event && event.cancelable) event.preventDefault();
+
+      // One dodge per gesture. A single tap fires up to four of these events.
+      const now = Date.now();
+      if (now - lastDodgeAt < 120) return;
+      lastDodgeAt = now;
+
       dodges += 1;
+      noScale = Math.max(0.45, noScale * 0.92);
 
-      const pad = 12;
-      const rect = noButton.getBoundingClientRect();
-      // Where the button would sit with no transform applied.
-      const homeLeft = rect.left - tx;
-      const homeTop = rect.top - ty;
+      const { minX, maxX, minY, maxY, VW } = limits();
+      const far = Math.min(140, VW * 0.35); // on a phone, 140px may be the whole screen
 
-      const minX = pad - homeLeft;
-      const maxX = window.innerWidth - pad - rect.width - homeLeft;
-      const minY = pad - homeTop;
-      const maxY = window.innerHeight - pad - rect.height - homeTop;
-
-      // Pick a spot that is actually far from where the cursor just was.
       let nx = tx;
       let ny = ty;
-      for (let i = 0; i < 12; i++) {
-        nx = minX + Math.random() * Math.max(0, maxX - minX);
-        ny = minY + Math.random() * Math.max(0, maxY - minY);
-        if (Math.hypot(nx - tx, ny - ty) > 120) break;
+      for (let i = 0; i < 14; i++) {
+        nx = clamp(minX + Math.random() * Math.max(0, maxX - minX), minX, maxX);
+        ny = clamp(minY + Math.random() * Math.max(0, maxY - minY), minY, maxY);
+        if (Math.hypot(nx - tx, ny - ty) > far) break;
       }
-      tx = nx;
-      ty = ny;
-      noScale = Math.max(0.4, noScale * 0.92);
+      tx = clamp(nx, minX, maxX);
+      ty = clamp(ny, minY, maxY);
       paint();
 
       if (caption) caption.textContent = PLEAS[Math.min(dodges - 1, PLEAS.length - 1)];
@@ -175,16 +231,24 @@
       if (caption) caption.textContent = 'Fine. The button will hold still. 😔';
     });
 
-    // Keep the button on-screen if the viewport changes underneath it.
-    window.addEventListener('resize', () => {
-      if (!dodging) return;
-      const rect = noButton.getBoundingClientRect();
-      if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
-        tx = 0;
-        ty = 0;
-        paint();
-      }
-    });
+    // Re-measure and pull the button back in bounds when the viewport changes —
+    // rotation, URL bar collapsing, on-screen keyboard, desktop resize.
+    const reflow = () => {
+      measureHome();
+      if (!dodges) return;
+      const { minX, maxX, minY, maxY } = limits();
+      tx = clamp(tx, minX, maxX);
+      ty = clamp(ty, minY, maxY);
+      paint();
+    };
+
+    window.addEventListener('resize', reflow);
+    window.addEventListener('orientationchange', reflow);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', reflow);
+
+    measureHome();
+    // Web fonts land after first paint and change the button's width.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(reflow);
 
     yesButton.addEventListener('click', () => {
       const url = new URL('yes.html', window.location.href);
@@ -274,8 +338,8 @@
         if (!inviteUrl) return;
         try {
           await navigator.share({
-            title: 'Do you wanna go out with me?',
-            text: 'I have a question for you 👀',
+            title: 'Moshe has a question for you',
+            text: 'Do you wanna go out with me? 👀',
             url: inviteUrl,
           });
         } catch (_) {
