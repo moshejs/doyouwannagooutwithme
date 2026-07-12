@@ -131,9 +131,17 @@ body {
   border-radius: 999px;
   box-shadow: var(--shadow);
   cursor: pointer;
+  touch-action: manipulation; /* no double-tap zoom on mobile */
   transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1),
               background-color 0.2s ease;
   will-change: transform;
+}
+
+/* The dodge maths in script.js assumes the transform origin is the top-left
+   corner: visual box == home + translate, sized home * scale. With the default
+   centre origin, scaling also shifts the box, and the clamp bounds drift. */
+.btn--no {
+  transform-origin: top left;
 }
 
 .btn:hover {
