@@ -73,14 +73,6 @@
     return '';
   };
 
-  /** Build a shareable invite URL. URLSearchParams does all the escaping. */
-  const buildInviteUrl = (name) => {
-    const url = new URL('index.html', window.location.href);
-    url.search = '';
-    url.searchParams.set('to', name);
-    return url.href;
-  };
-
   /* ---------------------------------------------------------------- *
    * Page 1 — the invite
    * ---------------------------------------------------------------- */
@@ -264,98 +256,7 @@
   };
 
   /* ---------------------------------------------------------------- *
-   * Page 2 — the link builder (settings.html)
-   * ---------------------------------------------------------------- */
-
-  const copyToClipboard = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch (_) {
-      // Safari / non-secure-context fallback.
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      let ok = false;
-      try {
-        ok = document.execCommand('copy');
-      } catch (__) {
-        ok = false;
-      }
-      document.body.removeChild(ta);
-      return ok;
-    }
-  };
-
-  const initBuilder = () => {
-    const form = document.getElementById('loverForm');
-    if (!form) return;
-
-    const input = document.getElementById('loverName');
-    const error = document.getElementById('formError');
-    const result = document.getElementById('result');
-    const linkText = document.getElementById('linkText');
-    const copyButton = document.getElementById('copyButton');
-    const shareButton = document.getElementById('shareButton');
-    const previewButton = document.getElementById('previewButton');
-
-    let inviteUrl = '';
-
-    if (shareButton && !navigator.share) shareButton.hidden = true;
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = cleanName(input.value);
-      if (!name) {
-        error.textContent = 'Give me a name first 🙂';
-        input.focus();
-        return;
-      }
-      error.textContent = '';
-      inviteUrl = buildInviteUrl(name);
-      linkText.textContent = inviteUrl;
-      linkText.href = inviteUrl;
-      result.hidden = false;
-      copyButton.textContent = 'Copy link';
-      result.scrollIntoView({ behavior: REDUCED_MOTION ? 'auto' : 'smooth', block: 'nearest' });
-    });
-
-    copyButton.addEventListener('click', async () => {
-      if (!inviteUrl) return;
-      const ok = await copyToClipboard(inviteUrl);
-      copyButton.textContent = ok ? 'Copied ✓' : 'Copy failed — select it manually';
-      setTimeout(() => {
-        copyButton.textContent = 'Copy link';
-      }, 2000);
-    });
-
-    if (shareButton) {
-      shareButton.addEventListener('click', async () => {
-        if (!inviteUrl) return;
-        try {
-          await navigator.share({
-            // Don't reveal the question — the page is the reveal.
-            title: 'Moshe has a question for you 👀',
-            text: 'One question. Two buttons. Open it.',
-            url: inviteUrl,
-          });
-        } catch (_) {
-          /* user dismissed the share sheet */
-        }
-      });
-    }
-
-    previewButton.addEventListener('click', () => {
-      if (inviteUrl) window.open(inviteUrl, '_blank', 'noopener');
-    });
-  };
-
-  /* ---------------------------------------------------------------- *
-   * Page 3 — yes.html
+   * Page 2 — yes.html
    * ---------------------------------------------------------------- */
 
   const confetti = () => {
@@ -423,11 +324,10 @@
   };
 
   /* ---------------------------------------------------------------- *
-   * Boot — each init is a no-op on the pages it doesn't apply to.
+   * Boot — each init is a no-op on the page it doesn't apply to.
    * ---------------------------------------------------------------- */
   const boot = () => {
     initInvite();
-    initBuilder();
     initYes();
   };
 
