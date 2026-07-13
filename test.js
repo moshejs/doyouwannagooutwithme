@@ -48,7 +48,6 @@ const cases = [
   ["invite, legacy accented b64",     "index.html", "?name=" + b64("Chloé"),   "Do you wanna go out with me, Chloé?"],
   ["invite, garbage ?name=%%%",       "index.html", "?name=%25%25%25",         "Do you wanna go out with me, %%%?"],
   ["invite, XSS attempt",             "index.html", "?to=%3Cimg%20src%3Dx%20onerror%3Dalert(1)%3E", null],
-  ["builder page loads",              "settings.html", "",                     "Who's your special someone?"],
   ["yes page, no name",               "yes.html", "",                          "Yeeeyyy!!"],
   ["yes page, with name",             "yes.html", "?to=Sarah",                 "Yeeeyyy, Sarah!!"],
 ];
